@@ -1,7 +1,7 @@
 #include<bits/stdc++.h>
 using namespace std;
 
-void triangle( map< int, map<int, int> > &graph_ori, map< int, map<int, int> > &graph_tri )
+void triangle( map< int, map<int, int> > &graph_ori, map< int, map<int, int> > &graph_tri, map< int, int > &in_degree )
 {
 	//********************CODE FOR ORDERING THE VERTICES ACCORDING TO THERE DEGREE*****************
 
@@ -9,34 +9,96 @@ void triangle( map< int, map<int, int> > &graph_ori, map< int, map<int, int> > &
 
 	map< int, map<int, int> > :: iterator itrr;//to traverse whole original map
 
+	//Considering degree = in_degree + out_degree
+
 	for( itrr = graph_ori.begin() ; itrr != graph_ori.end() ; itrr++)
 	{
-		degree.push_back( make_pair( graph_ori[ itrr->first ].size(), itrr->first ));//( degree, vertx )
+		degree.push_back( make_pair( graph_ori[ itrr->first ].size() + in_degree[ itrr->first ], itrr->first ));//( degree, vertx )
 	}
 
 	sort( degree.begin(), degree.end() );// to order the vertices according to there degree
 
-	/* Uncomment it to see ordering of vertices
 	vector< pair< int, int > > :: iterator it3;
-	cout<<"\n Ordering of vertices is as follows "<<endl;
+	vector< int > ordered_vertices;
+
+	//**************Storing ordered vertices in a vector ordered_vertices*******************
 	for( it3 = degree.begin() ; it3 != degree.end() ; it3++ )
-		cout<<it3->second;*/	
+		ordered_vertices.push_back( it3->second );
 
 	//******************UPTO HERE, THERE IS CODE FOR ORDERING THE VERTICES ACCORDING TO THERE DEGREE*********
 
 	//************NOW INSERTING THE EDGE IN THE NEW GRAPH WITH TRIANGULIZATION******************
 
-	vector< pair< int, int > > :: iterator itr;// to iterate through-out the degree vertex
-	map< int, int > :: iterator it1;// to traverse neighbours of any vertex
-	map< int, int > :: iterator it2;// to traverse every possible pair of immediate neighbours
+	// vector< pair< int, int > > :: iterator itr;// to iterate through-out the degree vertex
+	// map< int, int > :: iterator it1;// to traverse neighbours of any vertex
+	// map< int, int > :: iterator it2;// to traverse every possible pair of immediate neighbours
+	int i, j, k;
 
-	for( itr = degree.begin() ; itr != degree.end() ; itr++ )
+	for( k = ordered_vertices.size() - 1 ; k >= 0 ; k-- )
 	{
-		for( it1 = graph_ori[ itr->second ].begin() ; it1 != graph_ori[ itr->second ].end() ; it1++ )
+		for( j = k -1 ; j >= 0 ; j-- )
 		{
-			for( it2 = graph_ori[ itr->second ].begin() ; it2 != graph_ori[ itr->second ].end() ; it2++ )
+			for( i = j - 1 ; i >= 0 ; i-- )
 			{
-				if( it1 == it2 && it2 != graph_ori[ itr->second ].begin() )
+				int mij, mik, mkj, mjk, mki, mji;
+
+				//*****************Calculation for i-to-j*******************
+				if( graph_ori[ ordered_vertices[ i ] ][ ordered_vertices[ j ] ] )//weight of i to j
+					mij = graph_ori[ ordered_vertices[ i ] ][ ordered_vertices[ j ] ] ;
+				else
+					mij = 1000000;
+
+				if( graph_ori[ ordered_vertices[ i ] ][ ordered_vertices[ k ] ] )// weight of i to k
+					mik = graph_ori[ ordered_vertices[ i ] ][ ordered_vertices[ k ] ] ;
+				else
+					mik = 1000000;
+
+				if( graph_ori[ ordered_vertices[ k ] ][ ordered_vertices[ j ] ] )// weight of k to j
+					mkj = graph_ori[ ordered_vertices[ k ] ][ordered_vertices[ j ] ] ;
+				else
+					mkj = 1000000;
+
+				mij = mij < mik + mkj ? mij : mik + mkj ;
+				graph_tri[ ordered_vertices[ i ] ][ ordered_vertices[ j ] ] = mij ;
+
+				if( ordered_vertices[ i ] == 2 && ordered_vertices[ j ] == 3 )
+				{
+					cout<<ordered_vertices[ i ]<<" "<<ordered_vertices[ j ]<<endl;
+					cout<<"At k = "<<ordered_vertices[ k ]<<" value is "<<mij<<endl;
+				}
+
+				//***************Calculation for j-to-i***********************
+				if( graph_ori[ ordered_vertices[ j ] ][ ordered_vertices[ i ] ] )//weight of j to i
+					mji = graph_ori[ ordered_vertices[ j ] ][ ordered_vertices[ i ] ] ;
+				else
+					mji = 1000000;
+
+				if( graph_ori[ ordered_vertices[ j ] ][ ordered_vertices[ k ] ] )// weight of j to k
+					mjk = graph_ori[ ordered_vertices[ j ] ][ ordered_vertices[ k ] ] ;
+				else
+					mjk = 1000000;
+
+				if( graph_ori[ ordered_vertices[ k ] ][ ordered_vertices[ i ] ] )// weight of k to i
+					mki = graph_ori[ ordered_vertices[ k ] ][ ordered_vertices[ i ] ] ;
+				else
+					mki = 1000000;
+
+				mji = mji < mjk + mki ? mji : mjk + mki ;
+				graph_tri[ ordered_vertices[ j ] ][ ordered_vertices[ i ] ] = mji;
+
+				if( ordered_vertices[ j ] == 2 && ordered_vertices[ i ] == 3 )
+				{
+
+					cout<<ordered_vertices[ j ]<<" "<<ordered_vertices[ i ]<<endl;
+					cout<<"At k = "<<ordered_vertices[ k ]<<" value is "<<mji<<endl;
+				}
+				//***************Checking for consistency*************************
+				if( mij + mji < 0 )
+				{
+					cout<<"\nINCONSISTENT GRAPH"<<endl;
+					exit(EXIT_FAILURE);
+				}
+				/*if( it1 == it2 && it2 != graph_ori[ itr->second ].begin() )
 					continue;
 
 				else if( graph_ori[itr->second ].size() == 1 )
@@ -60,12 +122,12 @@ void triangle( map< int, map<int, int> > &graph_ori, map< int, map<int, int> > &
 					{
 						z = z < graph_tri[ it1->first ][ it2->first ] ? z : graph_tri[ it1->first ][ it2->first ] ;	
 					}
-					
+
 					graph_tri[ it1->first ][ it2->first ] = z ;// Inserting in the triangularized graph 
 					graph_tri[ it2->first ][ it1->first ] = z ;
 
 					// cout<<"\n\t Final value: "<<z<<endl;
-				}
+				}*/
 
 			}
 		}
@@ -98,25 +160,28 @@ int main(int argc, char *argv[])
 
 	map< int, map<int, int> > graph;//Original graph, structure is a, b, w, where (a,b) is edge and w is weight between them
 	map< int, map<int, int> > graph_tri;//diagonalised graph, structure is same as above
+	map< int, int > in_degree; 
 
 	infile >> n;
 	cout<<"\n Number of vertices in graph = "<<n<<endl;
 
+	cout<<"\n Taking input : "<<endl;
 	while( infile >> a >> b >> w)//Reading the file and storing into the map
 	{
-		if( graph[a][b] || graph[b][a] )
+		if( graph[a][b] )
 		{
 			cout<<"\n MULTIPLE ENTRIES FOR SAME EDGE ";
 			exit(EXIT_FAILURE);
 		}
 		cout<<a<<"  "<<b<<"  "<<w<<endl;
 		graph[a][b] = w;
-		graph[b][a] = w;
+		graph_tri[a][b] = w;
+		in_degree[b]++;
 
 
 	}
 
-	triangle(graph, graph_tri);//order of argument is " original graph, triangulised graph"
+	triangle(graph, graph_tri, in_degree );//order of argument is " original graph, triangulised graph"
 
 	//**************PRINTING TRIANGULARIZED GRAPH*************************
 
@@ -125,6 +190,7 @@ int main(int argc, char *argv[])
 
 	itrr = graph_tri.begin();
 
+	cout<<"\n Printing output : "<<endl;
 	while( itrr != graph_tri.end() )
 	{
 		it = graph_tri[ itrr-> first ].begin();
