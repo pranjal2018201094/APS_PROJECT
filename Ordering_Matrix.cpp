@@ -95,24 +95,37 @@ void triangle( vector< vector< int > > &graph, vector< int > &ordered_vertices)/
 	//****************TRIANGULARIZED GRAPH'S CODE IS UPTO HERE******************************
 }
 
-void min_path( int s,  vector< vector< int > > &graph, vector< int > &ordered_vertices )
+void min_path( int s,  vector< vector< int > > &graph, vector< int > &ordered_vertices, vector< vector< int > > &neighbourR, vector< vector< int > > &neighbourL )
 {
 
 	int k, i, j;//declaring helper variables
 
+	// cout<<"Prior neighbours"<<endl;
 	for( k = s ; k >= 0 ; k-- )//for vertices which occur before 's' in ordering
 	{
-		for( j = k - 1; j >=0; j-- )
+		// if( k > 0 )
+		// cout<<"Out"<<endl;
+		for( j = 0; j < neighbourL[ ordered_vertices[ k ] - 1 ].size() ; j++ )
 		{
+			// cout<<"In"<<endl;
 			// if( graph[ ordered_vertices[ k ] - 1 ][ ordered_vertices[ j ] - 1 ] != infy )
 			// {
 				int msj, msk, mkj;
 
-				msj = graph[ ordered_vertices[ s ] - 1 ][ ordered_vertices[ j ] - 1 ] ;//Initializing variables
+				msj = graph[ ordered_vertices[ s ] - 1 ][ neighbourR[ ordered_vertices[ k ] ][ j ] - 1 ] ;//Initializing variables
 				msk = graph[ ordered_vertices[ s ] - 1 ][ ordered_vertices[ k ] - 1 ] ;
-				mkj = graph[ ordered_vertices[ k ] - 1 ][ ordered_vertices[ j ] - 1 ] ;
+				mkj = graph[ ordered_vertices[ k ] - 1 ][ neighbourL[ ordered_vertices[ k ] ][ j ] ] ;
 
-				graph[ ordered_vertices[ s ] - 1 ][ ordered_vertices[ j ] - 1 ] = msj < msk + mkj ? msj : msk + mkj ;
+				if( msk == infy || mkj == infy )
+				{
+					//do nothing	
+				}
+				else
+				{
+					graph[ ordered_vertices[ s ] - 1 ][ neighbourR[ ordered_vertices[ k ] - 1 ][ j ] ] = msj < msk + mkj ? msj : msk + mkj ;
+				}
+				// graph[ ordered_vertices[ s ] - 1 ][ neighbourL[ ordered_vertices[ k ] - 1 ][ j ] ] = graph[ ordered_vertices[ s ] - 1 ][ neighbourL[ ordered_vertices[ k ] - 1 ][ j ] ] < graph[ ordered_vertices[ s ] - 1 ][ ordered_vertices[ k ] - 1 ] + graph[ ordered_vertices[ k ] - 1 ][ neighbourL[ ordered_vertices[ k ] - 1 ][ j ] ] ? graph[ ordered_vertices[ s ] - 1 ][ neighbourL[ ordered_vertices[ k ] - 1 ][ j ] ] : graph[ ordered_vertices[ s ] - 1 ][ ordered_vertices[ k ] - 1 ] + graph[ ordered_vertices[ k ] - 1 ][ neighbourL[ ordered_vertices[ k ] - 1 ][ j ] ] ;
+
 			// }
 		}
 	}
@@ -122,19 +135,38 @@ void min_path( int s,  vector< vector< int > > &graph, vector< int > &ordered_ve
 	// 	for( int j = 0 ; j < n ; j++ )
 	// 		cout<<i+1<<"  "<<j+1<<"  "<<graph[ i ][ j ]<<endl;
 
+	// cout<<"For neighbours after that vertex"<<endl;
 	for( k = 0 ; k < ordered_vertices.size() - 1 ; k++ )//for vertices which occurs after 's' in ordering
 	{
-		for( j = k + 1 ; j < ordered_vertices.size() - 1 ; j++ )
+		// cout<<"Out"<<endl;
+		// if( k <= ordered_vertices.size() - 2 )
+		for( j = 0 ; j < neighbourR[ ordered_vertices[ k ] - 1 ].size() ; j++ )
 		{
-			// if( graph[ ordered_vertices[ k ] - 1 ][ ordered_vertices[ j ] - 1 ] != infy )
+			// cout<<"In"<<endl;
+			// cout<<"Inner most loop for  k = "<<k<<endl;
+			// if( graph[ ordered_vertices[ k ] - 1 ][ neighbour[ ordered_vertices[ k ] - 1 ][ j ] - 1 ] != infy )
 			// {
 				int msj, msk, mkj;
 
-				msj = graph[ ordered_vertices[ s ] - 1 ][ ordered_vertices[ j ] - 1 ] ;//Initializing variables
+				// cout<<"1"<<endl;
+				msj = graph[ ordered_vertices[ s ] - 1 ][ neighbourR[ ordered_vertices[ k ] - 1 ][ j ] ] ;//Initializing variables
+				// cout<<"2"<<endl;
 				msk = graph[ ordered_vertices[ s ] - 1 ][ ordered_vertices[ k ] - 1 ] ;
-				mkj = graph[ ordered_vertices[ k ] - 1 ][ ordered_vertices[ j ] - 1 ] ;
+				// cout<<"3"<<endl;
+				mkj = graph[ ordered_vertices[ k ] - 1 ][ neighbourR[ ordered_vertices[ k ] - 1 ][ j ] ] ;
+				// cout<<"4"<<endl;
 
-				graph[ ordered_vertices[ s ] - 1 ][ ordered_vertices[ j ] - 1 ] = msj < msk + mkj ? msj : msk + mkj ;
+				if( msk == infy || mkj == infy )
+				{
+					//do nothing	
+				}
+				else
+				{
+					graph[ ordered_vertices[ s ] - 1 ][ neighbourR[ ordered_vertices[ k ] - 1 ][ j ] ] = msj < msk + mkj ? msj : msk + mkj ;
+				// cout<<"5"<<endl;
+				}
+
+				// graph[ ordered_vertices[ s ] - 1 ][ neighbourR[ ordered_vertices[ k ] - 1 ][ j ] - 1 ] = graph[ ordered_vertices[ s ] - 1 ][ neighbourR[ ordered_vertices[ k ] - 1 ][ j ] - 1 ] < graph[ ordered_vertices[ s ] - 1 ][ ordered_vertices[ k ] - 1 ] + graph[ ordered_vertices[ k ] - 1 ][ neighbourR[ ordered_vertices[ k ] - 1 ][ j ] - 1 ] ? graph[ ordered_vertices[ s ] - 1 ][ neighbourR[ ordered_vertices[ k ] - 1 ][ j ] - 1 ] : graph[ ordered_vertices[ s ] - 1 ][ ordered_vertices[ k ] - 1 ] + graph[ ordered_vertices[ k ] - 1 ][ neighbourR[ ordered_vertices[ k ] - 1 ][ j ] - 1 ] ;
 			// }
 		}
 	}
@@ -196,14 +228,15 @@ int main(int argc, char *argv[])
 		// graph_tri[a - 1][b - 1] = w;
 		// cout<<a<<"  "<<b<<"  "<<graph[a - 1][b - 1]<<endl;
 
-		in_degree[a - 1]++;
+		// in_degree[a - 1]++;
+		in_degree[b - 1]++;
 
 	}
 
 	//**********************TO GET THE ORDERING*******************************************
 	// t1 = clock();
-	auto start = high_resolution_clock::now(); 
-	order( in_degree, ordered_vertices );
+	 
+	order( in_degree, ordered_vertices ); 
 
 	// cout<<"Ordering:-"<<endl;//******************OK TESTED************************
 	// for( int i = 0 ; i < ordered_vertices.size() ; i++ )
@@ -218,14 +251,58 @@ int main(int argc, char *argv[])
 	// 	for( int j = 0 ; j < n ; j++ )
 	// 		cout<<i+1<<"  "<<j+1<<"  "<<graph[ i ][ j ]<<endl;
 
+	//***********************TO STORE THE NEIGHBOURS**************************************
+
+	/*We are storing the neighbours of a vertex inamanner that, the neighbour should appear after
+	the vertex in the order, i.e., we will add 'v' as neighbour of 'u' if index of v 'vi' is greater
+	than 'u th' index 'ui'*/
+
+	vector< vector< int > > neighbourR(n);// to store the neighbours of a particular vertex after the ordering is done
+
+	for( int i = 0 ; i < ordered_vertices.size() ; i++ )
+		for( int j = i + 1 ; j < ordered_vertices.size() ; j++ )
+		{
+			if( graph[ ordered_vertices[ i ] - 1 ][ ordered_vertices[ j ] - 1 ] != infy )
+				neighbourR[ ordered_vertices[ i ] - 1 ].push_back( ordered_vertices[ j ] - 1 );
+		} 
+
+	vector< vector< int > > neighbourL(n);// to store the neighbours of a particular vertex after the ordering is done
+
+	for( int i = 0 ; i < ordered_vertices.size()  ; i++ )
+		for( int j = i - 1 ; j >= 0 ; j-- )
+		{
+			if( graph[ ordered_vertices[ i ] - 1 ][ ordered_vertices[ j ] - 1 ] != infy )
+				neighbourR[ ordered_vertices[ i ] - 1 ].push_back( ordered_vertices[ j ] - 1 );
+		} 
+
+
+		// for( int i = 0 ; i < ordered_vertices.size() ; i++ )
+		// {
+		// 	cout<<"Right neighbours of "<<ordered_vertices[ i ]<<endl;
+		// 	for( int j = 0 ; j < neighbourR[ ordered_vertices[ i ] - 1 ].size() ; j++ )
+		// 		cout<<neighbourR[ ordered_vertices[ i ] - 1 ][ j ] + 1<<endl;
+		// }
+
+		// for( int i = 0 ; i < ordered_vertices.size() ; i++ )
+		// {
+		// 	cout<<"Left neighbours of "<<ordered_vertices[ i ]<<endl;
+		// 	for( int j = 0 ; j < neighbourL[ ordered_vertices[ i ] - 1 ].size() ; j++ )
+		// 		cout<<neighbourL[ ordered_vertices[ i ] - 1 ][j] + 1<<endl;
+		// }
+
 	//**********************FINDING THE ALL PAIR SHORTEST PATH***********************************
 	int v;
+
+	// cout<<"After filling neighbour vectors "<<endl;
 
 	for(v = 0 ; v < n ; v++ )//for making diagonal of matrix 0
 		graph[v][v] = 0 ;
 
+	// cout<<"Calling min_path "<<endl;
+
+	auto start = high_resolution_clock::now();
 	for(v = 0 ; v < n ; v++ )//for every vertices we will call min_path in the order of  ordered_vertices
-		min_path( v, graph, ordered_vertices ) ;
+		min_path( v, graph, ordered_vertices, neighbourR, neighbourL ) ;
 
 	// t2 = clock();
 	auto stop = high_resolution_clock::now(); 
@@ -234,11 +311,13 @@ int main(int argc, char *argv[])
 	//**************PRINTING SHORTEST DISTANCE GRAPH*************************
 
 	auto duration = duration_cast<microseconds>(stop - start); 
-	cout<<"\n All pair shortest distances  : "<<endl;
+	// cout<<"\n All pair shortest distances  : "<<endl;
 	for( int i = 0 ; i < n ; i++ )
 		for( int j = 0 ; j < n ; j++ )
-			cout<<i+1<<"  "<<j+1<<"  "<<graph[ i ][ j ]<<endl;
+			cout<<i+1<<" "<<j+1<<" "<<graph[ i ][ j ]<<endl;
 
-	cout<<"Time taken = "<<duration.count()<<" ms"<<endl;		
+	cout<<"Time taken = "<<duration.count()<<" ms"<<endl;	
+
+	return 0;	
 	
 }

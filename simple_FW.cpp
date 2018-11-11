@@ -93,7 +93,14 @@ int main(int argc, char *argv[])
 		for(i=0;i<number_of_vertex;i++)
 			for(j=0;j<number_of_vertex;j++)	
 			{
-				A[i][j]=(A[i][j]>(A[i][k] + A[k][j]))?(A[i][k] + A[k][j]) : A[i][j];
+				if( A[i][k] == 1000000 || A[k][j] == 1000000 )
+				{
+					//do nothing
+				}
+				else
+				{
+					A[i][j]=(A[i][j]>(A[i][k] + A[k][j]))?(A[i][k] + A[k][j]) : A[i][j];
+				}
 			}
 	// t2= clock();
 	stop = high_resolution_clock::now(); 
@@ -106,15 +113,16 @@ int main(int argc, char *argv[])
 
 	auto duration = duration_cast<microseconds>(stop - start); 
 
-	cout<<"\n Time taken = "<<(t2-t1); //Output
+	// cout<<"\n Time taken = "<<(t2-t1); //Output
 
+	// cout<<"\n All pair shortest distances  : "<<endl;
 	for(i=0;i<number_of_vertex;i++)
 	{
 		for(j=0;j<number_of_vertex;j++)
 		{
-			cout<<i<<" "<<j<<" "<<A[i][j]<<endl;
+			cout<<i+1<<" "<<j+1<<" "<<A[i][j]<<endl;
 		}
-		cout<<"\n";
+		// cout<<"\n";
 	}		
 
 	cout<<"Time taken = "<<duration.count()<<" ms"<<endl;
