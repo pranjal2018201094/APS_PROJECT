@@ -1,9 +1,12 @@
 # APS_PROJECT
 Planar graph All Pair Shortest Path and its variations.
 
+
 Test cases consist of vertice_count Edge_count and Edges_from_to along with weights
 Test input format
+
 .............................
+
 V E
 a vi vj wk
 .
@@ -13,6 +16,7 @@ a vi vj wk
 .
 .
 ..................
+
 where V is no of vertices.
       E is no of Edges.
       vi,vj...... upto vV are vertices
