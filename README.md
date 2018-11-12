@@ -7,9 +7,9 @@ Test input format
 
 .............................
 
-V E
+V     E
 
-a vi vj wk
+a     vi    vj    wk
 
 .
 
