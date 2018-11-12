@@ -8,18 +8,29 @@ Test input format
 .............................
 
 V E
+
 a vi vj wk
+
 .
+
 .
+
 .
+
 .
+
 .
+
 .
+
 ..................
 
 where V is no of vertices.
+
       E is no of Edges.
+      
       vi,vj...... upto vV are vertices
+      
       wk.... upto vV are Weights between vi and vj.
       
 to check file
