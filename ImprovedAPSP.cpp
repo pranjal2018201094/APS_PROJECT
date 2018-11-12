@@ -36,14 +36,14 @@ void order( vector< int > &in_degree, vector< int > &ordered_vertices )
 void triangle( vector< vector< int > > &graph, vector< int > &ordered_vertices)//********************OK TESTED**********
 {
 
-	//************NOW INSERTING NEW EDGES IN THE GRAPH WITH TRIANGULIZATION******************
+	//************NOW INSERTING THE EDGE IN THE NEW GRAPH WITH TRIANGULIZATION******************
 	int i, j, k;
 
 	for( k = ordered_vertices.size() - 1 ; k >= 0 ; k-- )
 	{
-
 		for( j = k -1 ; j >= 0 ; j-- )
 		{
+
 			if( graph[ ordered_vertices[ k ] - 1 ][ ordered_vertices[ j ] - 1 ] != infy || graph[ ordered_vertices[ j ] - 1 ][ ordered_vertices[ k ] - 1 ] != infy )
 				for( i = j - 1 ; i >= 0; i-- )
 				{
@@ -94,23 +94,25 @@ void min_path( int s,  vector< vector< int > > &graph, vector< int > &ordered_ve
 
 	for( k = s ; k >= 0 ; k-- )//for vertices which occur before 's' in ordering
 	{
+
 		for( j = 0; j < neighbourL[ ordered_vertices[ k ] - 1 ].size() ; j++ )
 		{
+
 				int msj, msk, mkj;
 
-				msj = graph[ ordered_vertices[ s ] - 1 ][ neighbourR[ ordered_vertices[ k ] ][ j ] - 1 ] ;//Initializing variables
-
+				msj = graph[ ordered_vertices[ s ] - 1 ][ neighbourL[ ordered_vertices[ k ] - 1 ][ j ] ] ;//Initializing variables
+				
 				msk = graph[ ordered_vertices[ s ] - 1 ][ ordered_vertices[ k ] - 1 ] ;
-
-				mkj = graph[ ordered_vertices[ k ] - 1 ][ neighbourL[ ordered_vertices[ k ] ][ j ] ] ;
-
+				
+				mkj = graph[ ordered_vertices[ k ] - 1 ][ neighbourL[ ordered_vertices[ k ] - 1 ][ j ] ] ;
+				
 				if( msk == infy || mkj == infy )
 				{
 					//do nothing	
 				}
 				else
 				{
-					graph[ ordered_vertices[ s ] - 1 ][ neighbourR[ ordered_vertices[ k ] - 1 ][ j ] ] = msj < msk + mkj ? msj : msk + mkj ;
+					graph[ ordered_vertices[ s ] - 1 ][ neighbourL[ ordered_vertices[ k ] - 1 ][ j ] ] = msj < msk + mkj ? msj : msk + mkj ;
 				}
 		}
 	}
@@ -122,7 +124,7 @@ void min_path( int s,  vector< vector< int > > &graph, vector< int > &ordered_ve
 				int msj, msk, mkj;
 
 				msj = graph[ ordered_vertices[ s ] - 1 ][ neighbourR[ ordered_vertices[ k ] - 1 ][ j ] ] ;//Initializing variables
-			
+				
 				msk = graph[ ordered_vertices[ s ] - 1 ][ ordered_vertices[ k ] - 1 ] ;
 
 				mkj = graph[ ordered_vertices[ k ] - 1 ][ neighbourR[ ordered_vertices[ k ] - 1 ][ j ] ] ;
@@ -136,8 +138,7 @@ void min_path( int s,  vector< vector< int > > &graph, vector< int > &ordered_ve
 					graph[ ordered_vertices[ s ] - 1 ][ neighbourR[ ordered_vertices[ k ] - 1 ][ j ] ] = msj < msk + mkj ? msj : msk + mkj ;
 				}
 		}
-	}
-
+	}	
 }
 
 
@@ -182,11 +183,12 @@ int main(int argc, char *argv[])
 	{
 		if( graph[a - 1][b - 1] != infy )
 		{
+			cout<<"\n MULTIPLE ENTRIES FOR SAME EDGE "<<endl;
 			exit(EXIT_FAILURE);
 		}
 
 		graph[a - 1][b - 1] = w;
-
+		
 		in_degree[b - 1]++;
 
 	}
@@ -196,6 +198,7 @@ int main(int argc, char *argv[])
 	order( in_degree, ordered_vertices ); 
 
 	//***********************FOR TRIANGULARIZING THE GRAPH******************************** 
+
 	triangle(graph, ordered_vertices );//order of argument is " original graph, triangulised graph, in_degree vector, ordered_vertices vector"
 
 	//***********************TO STORE THE NEIGHBOURS**************************************
@@ -207,28 +210,36 @@ int main(int argc, char *argv[])
 	vector< vector< int > > neighbourR(n);// to store the neighbours of a particular vertex after the ordering is done
 
 	for( int i = 0 ; i < ordered_vertices.size() ; i++ )
+	{
 		for( int j = i + 1 ; j < ordered_vertices.size() ; j++ )
 		{
 			if( graph[ ordered_vertices[ i ] - 1 ][ ordered_vertices[ j ] - 1 ] != infy )
 				neighbourR[ ordered_vertices[ i ] - 1 ].push_back( ordered_vertices[ j ] - 1 );
-		} 
+		}
+	} 
 
 	vector< vector< int > > neighbourL(n);// to store the neighbours of a particular vertex after the ordering is done
 
-	for( int i = 0 ; i < ordered_vertices.size()  ; i++ )
+	for( int i = ordered_vertices.size() - 1 ; i > 0   ; i-- )
+	{
 		for( int j = i - 1 ; j >= 0 ; j-- )
 		{
 			if( graph[ ordered_vertices[ i ] - 1 ][ ordered_vertices[ j ] - 1 ] != infy )
-				neighbourR[ ordered_vertices[ i ] - 1 ].push_back( ordered_vertices[ j ] - 1 );
-		} 
+			{
+				neighbourL[ ordered_vertices[ i ] - 1 ].push_back( ordered_vertices[ j ] - 1 );
+			}
+		}
+	} 
 
 	//**********************FINDING THE ALL PAIR SHORTEST PATH***********************************
+	
 	int v;
 
 	for(v = 0 ; v < n ; v++ )//for making diagonal of matrix 0
 		graph[v][v] = 0 ;
 
 	auto start = high_resolution_clock::now();
+
 	for(v = 0 ; v < n ; v++ )//for every vertices we will call min_path in the order of  ordered_vertices
 		min_path( v, graph, ordered_vertices, neighbourR, neighbourL ) ;
 
@@ -238,7 +249,7 @@ int main(int argc, char *argv[])
 	//**************PRINTING SHORTEST DISTANCE GRAPH*************************
 
 	auto duration = duration_cast<microseconds>(stop - start); 
-	//Uncomment this loop to see the  all pair shortes paths
+	// cout<<"\n All pair shortest distances  : "<<endl;
 	// for( int i = 0 ; i < n ; i++ )
 	// 	for( int j = 0 ; j < n ; j++ )
 	// 		cout<<i+1<<" "<<j+1<<" "<<graph[ i ][ j ]<<endl;
